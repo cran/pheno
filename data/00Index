@@ -1,0 +1,8 @@
+Simple				Simple example of a two-way classification table
+				where lacking data creates two distinct connected sets
+Searle				Example of a two-way classification table where lacking data 
+				creates three distinct connected sets. 
+				From Searle (1997) 'Linear Models'. Wiley. 324p.
+DWD				Example of an unbalanced phenological data set. 
+				Phenological observations of nine stations from 1951 to 1998
+				from the German Weather Service.

@@ -1,0 +1,28 @@
+pheno.ddm		Automatic creation of dense two-way classification design matrix
+			The sum of the second factor is constrained to be zero. No general mean.
+seqMK			Sequential Mann-Kendall test
+daylength		Calculates daylength dl [h] and declination delta  [radians]
+maxdaylength		Calculates maximal daylength maxdl [h] at a certain latitude lat [degrees]
+raw2matrix		Converts a numeric data frame D with three columns (x, factor 1, factor 2)
+			in a matrix M where rows are ranks of levels of factor 1 and columns are
+			ranks of levels of factor 2, missing values are set to 0.
+matrix2raw		Converts a matrix M into a dataframe D with three columns
+			(x, factor 1, factor 2),
+			where rows of M are ranks of factor 1 levels and columns of M are
+			ranks of factor 2 levels, missing values are assumed to be 0.
+connectedSets		Finds connected data sets of a numeric matrix M
+maxConnectedSets 	Returns largest connected data set of a either numeric data frame D
+		 	with three columns (x, factor 1, factor 2) or a n*m matrix M,
+		 	where the n rows correspond to n levels of factor 2 and m columns
+		 	correspond to m levels of factor 1.
+pheno.mlm.fit		Fits a two-way linear mixed model given a data frame with three columns
+			(x, factor 1, factor 2) or a matrix M where rows of M are ranks of
+			factor 1 levels and columns of M are ranks of factor 2 levels,
+			missing values are set to 0.
+			No general mean and sum of f2 is constrained to be zero.
+pheno.lad.fit		Robust (least absolute deviations LAD/L1) fit of a two-way linear model
+			given a data frame with three columns (x, factor 1, factor 2) or
+			a matrix M where rows of M are ranks of factor 1 levels
+			and columns of M are ranks of factor 2 levels,
+			missing values are assumed to be 0.
+			No general mean and sum of f2 is constrained to be zero.
