@@ -11,7 +11,7 @@
 \arguments{
 	\item{D}{Data frame with three columns (x, f1, f2) or a matrix
 	where rows are ranks of factor f1 levels and columns are ranks 
-	of factor f2 levels and missing values are set to 0.}	
+	of factor f2 levels and missing values are assumed to be NA or 0.}	
 }
 \details{
 	This function is basically a wrapper for the \code{lme()} function of
@@ -41,11 +41,11 @@
 }
 \examples{
 	data(DWD)
-	R <- pheno.mlm.fit(DWD)								# parameter estimation
+	R <- pheno.mlm.fit(DWD)					# parameter estimation
 	plot(levels(factor(DWD[[2]])),R$fixed,type="l")		# plot combined time series
 	tr <- lm(R$fixed~rank(levels(factor(DWD[[2]]))))	# trend estimation
-	summary(tr)$coef[2]									# slope of trend
-	summary(tr)$coef[4]									# standard error of trend
+	summary(tr)$coef[2]					# slope of trend
+	summary(tr)$coef[4]					# standard error of trend
 }
 \keyword{design}
 \keyword{models}

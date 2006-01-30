@@ -27,5 +27,5 @@ seqMK <- function(x) {
 		if(sign(diff[i])==sign(diff[i+1])) { tp[i+1] <- FALSE }
 		else { tp[i+1] <- TRUE }
 	}
-	return(prog,retr,tp)
+	return(list(prog=prog, retr=retr, tp=tp))
 }

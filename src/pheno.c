@@ -2,35 +2,168 @@
 /**                                                                          **/
 /**                        P H E N O .  C                                    **/
 /**                                                                          **/
-/**   pheno.c: implementation file for libpheno.a, a library 				 **/
-/** 		for diverse functions 											 **/
+/**   pheno.c: implementation file for R pheno package C functions			 **/
 /**                                                                          **/
-/**   Last changes: 31/10/2003                                               **/
+/**   Last changes: 2/2/2006                                                 **/
 /**                                                                          **/
 /**   written by Joerg Schaber                                               **/
-/**              Potsdam Institute for Climate Impact Research               **/
-/**              P.O. Box 60 12 03                                           **/
-/**              D-14412 Potsdam/Germany                                     **/
+/**				Max Planck Institute for Molecular Genetics					 **/
 /**                                                                          **/
 /**   This code is subject to the GNU PUBLIC LICENSE 2 or higher	         **/
 /******************************************************************************/
 /* ANSI C implementation of some auxiliary functions
- * for the calculation of combined phenological time series
  *
- * 1. daylength(double lat, int iday, double *dl, double *delta)
+ * 1. date2jul1(int *doy, int *year, char *date[])
+ *     wandet ein Datumsstring der Form DD.MM.YYYY in eine
+ *     julianischen Datum um.
+ *
+ * 2. date2jul2(int *doy, int *year, int *month, int *day)
+ *      wandelt ein Datum in DOY um, Schaltjahre werden mit
+ *      beruecksichtigt
+ *
+ * 3. daysbetween(char *date1[], char *date2[], int *ndays)
+ *    liefert die Anzahl Tage ziwschen datew 1und date2 als int,
+ *    wobei Datum im Format DD.MM.YYYY angegeben sein muss.
+ *
+ * 4. daylength(double *lat, int *iday, double *dl, double *delta)
  *    calculates daylength dl [h] and declination delta  [radians]
  *    on day iday for latitude lat [degrees]
  *    declination: angle between sun rays and equatorial plane for 
  *    the whole earth (-23 degrees - + 23 degrees)
- * 2. maxdaylength(double lat)
+ *
+ * 5. jul2date1(int *doy, int *year, char *date[]);
+ *     wandelt ein julianischen Datum (Tag im Jahr, Jahr)
+ *     in ein Datum als String der Form DD.MM.YYYY um.
+ *
+ * 6. jul2date2(int *doy, int *year, int *day, int *month)
+ *     wandelt ein julianischen Datum (Tag im Jahr, Jahr)
+ *     in ein Datum als int monat, Tag um
+ *
+ * 7. leapyear(int *year, int *ly)
+ *     ly = 1 = leapyear
+ *     ly = 0 = kein leapyear
+ *
+ * 8. maxdaylength(double *lat, double *maxdl)
  *    calculates maximal daylength dl [h] at a certain latitude lat [degrees]
- * 3. connectivity: finds connected data sets of a matrix
+ * 
+ * 9. connectivity: finds connected data sets of a matrix
+
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include "pheno.h"
+
+/* auxiliary function for integer conversion */
+void itoa(int n, char *s)
+{
+    int len=0,sign,i=0,j,c;
+
+    if((sign = n) < 0) n = -n; /* Vorzeichen merken */
+
+    /* Ziffern von recht her generieren */
+    do {
+
+        *(s+i) = n % 10 + '0';  /* naechste Ziffer */
+        len++;                  /* Laenge mitzaehlen*/
+        i++;
+
+    } while ((n /= 10 ) > 0);
+
+    if (sign < 0)
+    {
+        *(s+i) = '-';
+        len++;
+    }
+
+    /*  jetzt umdrehen  */
+    for(i=0,j=len-1; i < j; i++, j--)
+    {
+        c = *(s+i);
+        *(s+i) = *(s+j);
+        *(s+j) = c;
+    }
+
+    /*  abschliessen  */
+    *(s+len) = '\0';
+}
+
+void date2jul1(char *date[], int *doy, int *year)
+{
+    int day, month, ly;
+    int month_end[13]={0,31,59,90,120,151,181,212,243,273,304,334,365};
+
+    day   = atoi(*date);
+    month = atoi((*date)+3);
+    *year = atoi((*date)+6);
+
+	leapyear(year,&ly);
+	
+    if(ly && month > 2)
+    {
+        *doy = month_end[month-1]+1+day;
+    }
+    else *doy = month_end[month-1]+day;
+}
+ 
+void date2jul2(int *year, int *month, int *day, int *doy)
+{
+    int ly,month_end[13]={0,31,59,90,120,151,181,212,243,273,304,334,365};
+
+	leapyear(year,&ly);
+
+    if(ly && *month > 2)
+    {
+        *doy = month_end[(*month)-1]+1+(*day);
+    }
+    else *doy = month_end[(*month)-1]+(*day);
+
+}
+
+void daysbetween(char *date1[], char *date2[], int *ndays)
+{
+    int ly,doy1,doy2,year1,year2,i,tmp;
+
+    date2jul1(date1,&doy1,&year1);
+    date2jul1(date2,&doy2,&year2);
+
+    if(year1==year2) *ndays = abs(doy1-doy2);
+    else if( year1 > year2 )
+    { 
+		leapyear(&year2,&ly);
+
+        if(ly) tmp = 366 - doy2;
+        else tmp = 365 - doy2;
+
+        for(i=year2+1;i<year1;i++)
+        {
+			leapyear(&i,&ly);
+
+            if(ly) tmp = tmp + 366;
+            else tmp = tmp + 365;
+        }
+
+        *ndays = (tmp + doy1);
+    }
+    else
+    {
+		leapyear(&year1,&ly);
+
+        if(ly) tmp = 366 - doy1;
+        else tmp = 365 - doy1;
+
+        for(i=year1+1;i<year2;i++)
+        {
+			leapyear(&i,&ly);
+
+            if(ly) tmp = tmp + 366;
+            else tmp = tmp + 365;
+        }
+
+        *ndays = (tmp + doy2);
+    }
+}
 
 void daylength(double *lat, int *iday, double *dl, double *delta)
 {
@@ -44,6 +177,110 @@ void daylength(double *lat, int *iday, double *dl, double *delta)
     if( arg < -1 ) *dl = 24;
     else if ( arg > 1 ) *dl = 0;
     else *dl = (24./M_PI)*acos(arg);
+}
+
+void jul2date1(int *doy, int *year, char *date[])
+{
+    char day[3],monthc[3],yearc[5];
+    char *day_ptr, *monthc_ptr, *yearc_ptr;
+    int ly,month = 1;
+    int month_end[13]={0,31,59,90,120,151,181,212,243,273,304,334,365};
+
+	leapyear(year,&ly);
+
+    if( ly )
+    {
+        while( month_end[month] < *doy )
+        {
+           month++;
+           month_end[month]++;
+        }
+    }
+    else
+    {
+        while( month_end[month] < *doy )
+        {
+           month++;
+        }
+    }
+
+    day_ptr    = &day[0];
+    monthc_ptr = &monthc[0];
+    yearc_ptr  = &yearc[0];
+
+    itoa(*doy - month_end[month-1],day_ptr);
+    itoa(month,monthc_ptr);
+    itoa(*year,yearc_ptr);
+
+    if ( *doy - month_end[month-1] < 10 )
+    {
+        date[0][0] = '0';
+        date[0][1] = *day_ptr;
+    }
+    else
+    { 
+        date[0][0] = *day_ptr;
+        date[0][1] = *(day_ptr+1);
+    }
+
+    date[0][2]  = '.';
+
+    if ( month < 10 )
+    {
+        date[0][3] = '0';
+        date[0][4] = *monthc_ptr;
+    }
+    else
+    {
+        date[0][3] = *monthc_ptr;
+        date[0][4] = *(monthc_ptr+1);
+    }  
+
+    date[0][5] =  '.';
+    date[0][6] = *yearc_ptr;
+    date[0][7] = *(yearc_ptr+1);
+    date[0][8] = *(yearc_ptr+2);
+    date[0][9] = *(yearc_ptr+3);
+    date[0][10] = '\0';
+}
+
+void jul2date2(int *doy, int *year, int *day, int *month)
+{
+    int ly, monthc = 1;
+    int month_end[13]={0,31,59,90,120,151,181,212,243,273,304,334,365};
+
+	leapyear(year,&ly);
+	
+    if( ly )
+    {
+        while( month_end[monthc] < *doy )
+        {
+           monthc++;
+           month_end[monthc]++;
+        }
+    }
+    else
+    {
+        while( month_end[monthc] < *doy )
+        {
+           monthc++;
+        }
+    }
+
+    *day = *doy - month_end[monthc-1];
+    *month = monthc;
+}
+
+void leapyear(int *year, int *ly)
+{
+    if( (*year)%400==0 || ( (*year)%100!=0 && (*year)%4==0 ))
+    {
+        *ly = 1;
+    }
+    else
+    {
+        *ly = 0;
+    }
 }
 
 void maxdaylength(double *lat, double *maxdl)

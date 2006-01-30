@@ -18,7 +18,7 @@
 	Joerg Schaber
 }
 \examples{
-	daylength(120,63)
+	daylength(as.integer(120),63)
 }
 \keyword{misc}
 \keyword{utilities}

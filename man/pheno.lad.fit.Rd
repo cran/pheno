@@ -11,7 +11,7 @@
 \arguments{
 	\item{D}{Data frame with three columns (x, f1, f2) or a matrix 
 	where rows are ranks of factor f1 levels and columns are ranks 
-	of factor f2 levels and missing values are set to 0.}	
+	of factor f2 levels and missing values are assumed to be NA or 0.}	
 }
 \details{
 	The function minimizes the least absolute deviations (LAD or L1 norm)
@@ -49,10 +49,10 @@
 }
 \examples{
 	data(DWD)
-	R <- pheno.lad.fit(DWD)							# robust parameter estimation
+	R <- pheno.lad.fit(DWD)				# robust parameter estimation
 	plot(levels(factor(R$D[[2]])),R$p1,type="l")	# plot combined time series
-	R$D[R$resid >= 30,]								# observation whose residuals
-   													# are > 30 days (outliers)
+	R$D[R$resid >= 30,]				# observation whose residuals
+							# are > 30 days (outliers)
 }
 \keyword{design}
 \keyword{models}

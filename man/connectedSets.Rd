@@ -7,7 +7,7 @@
 }
 \usage{connectedSets(M)}
 \arguments{
-	\item{M}{Numeric matrix with 0-entries considered as missing values.}
+	\item{M}{Numeric matrix with missing values assumed to be NA or 0.}
 }
 \details{
 	In a two-way classification of linear models sometimes independent

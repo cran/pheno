@@ -1,5 +1,5 @@
 # Automatic creation of dense two-way classification design matrix
-# for usage of dense robust estimation with rq.fit.sfn (package nprq).
+# for usage of dense robust estimation with rq.fit.sfn (package qunatreg).
 # The sum of the second factor is constrained to be zero. No general mean.
 # Usually this is much easier created by:
 # y <- factor(f1)
@@ -14,16 +14,15 @@
 # and the sorted data frame D (data frame is being sorted first by f2 then by f1 )
 pheno.ddm <- function(D) {
 	if(!is.data.frame(D) || length(D) != 3) 
-		stop("my.ddm: argument must be data frame with 3 fields. Exiting ...")
+		stop("pheno.ddm: argument must be data frame with 3 fields. Exiting ...")
 
-	require(SparseM)
 	# order first by factor 2 then by factor 1
 	D <-  D[order(D[[3]],D[[2]]),]
 	no <- length(D[[1]])	 	# number of observations
 	f1 <- factor(D[[2]]) 		# factor 1: year
 	n1 <- nlevels(f1) 			# number of levels factor 1 (phenology: years)
 	f2 <- factor(D[[3]])		# factor 2: station
-	n2 <- nlevels(f2)			#  number of levels factor 2 (phenology: station)
+	n2 <- nlevels(f2)			# number of levels factor 2 (phenology: station)
 	
 	# ra: Object of class numeric, a real array of nnz elements containing the 
 	#	non-zero elements of A, stored in row order. Thus, if i<j, all elements 
@@ -52,7 +51,7 @@ pheno.ddm <- function(D) {
 	ia[1] <- as.integer(1) 
 	for(i in 1:(no-nols)) {
 		ja[2*i-1] <- as.integer(f1[[i]])
-		ja[2*i] <- as.integer(n1+f2[[i]])
+		ja[2*i] <- n1 + as.integer(f2[[i]])
 		ia[i+1] <- as.integer(ia[i] + 2)
 	}
 	k <- 2*(no-nols)+1
@@ -64,5 +63,5 @@ pheno.ddm <- function(D) {
 	}
 	dim <- as.integer(c(no,n1+n2-1))
 	ddm <- new("matrix.csr",ra=ra,ja=ja,ia=ia,dimension=dim)
-	return(ddm,D=D)
+	return(list(ddm=ddm,D=D))
 }

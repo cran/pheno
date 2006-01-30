@@ -1,7 +1,7 @@
 # Robust (least absolute deviations LAD/L1) fit of a two-way linear model 
 # given a data frame with three columns (x, factor 1, factor 2) or 
 # a matrix M where rows of M are ranks of factor 1 levels
-# and columns of M are ranks of factor 2 levels, missing values are assumed to be 0.
+# and columns of M are ranks of factor 2 levels, missing values are assumed to be NA or 0.
 # No general mean and sum of f2 is constrained to be zero. 
 # Estimation method: interior point method in case of dense implementation,
 # else Barrodale-Roberts
@@ -25,9 +25,6 @@ pheno.lad.fit <- function(D) {
 		D <- matrix2raw(D)
 	}
 
-	require(quantreg)
-	require(nprq)
-	
 	D <-  D[order(D[[3]],D[[2]]),]
 
 	s <- factor(D[[3]])
@@ -54,5 +51,5 @@ pheno.lad.fit <- function(D) {
 		resid <- as.vector(residuals(l1fit),"numeric")
 		ierr <- NA
 	}
-	return(p1,p2,resid,ierr,D)
+	return(list(p1=p1, p2=p2, resid=resid, ierr=ierr, D=D))
 }

@@ -35,10 +35,11 @@ maxConnectedSet <- function(M) {
 	ms <- M[which(sets$rowclasses==max),which(sets$colclasses==max)]
 	
 	if(out == 0) { # return matrix
-		return(ms,maxl,nsets,lsets)
+		return(list(ms=ms, maxl=maxl, nsets=nsets, lsets=lsets))
 	}
 	else {			# return data frame
-		ms <- matrix2raw(ms,as.vector(levels(f1),"numeric"), as.vector(levels(f2),"numeric"))
-		return(ms,maxl,nsets,lsets)
+		# correct for dropped levels
+		ms <- matrix2raw(ms,as.numeric(levels(f1)[which(sets$rowclasses==max)]),as.numeric(levels(f2)[which(sets$colclasses==max)]))
+		return(list(ms=ms, maxl=maxl, nsets=nsets, lsets=lsets))
 	}
 }
