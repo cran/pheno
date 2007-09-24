@@ -1,5 +1,6 @@
 # Automatic creation of dense two-way classification design matrix
-# for usage of dense robust estimation with rq.fit.sfn (package qunatreg).
+# for usage of dense robust estimation with rq.fit.sfn (package quantreg).
+# or slm.fit (package SparseM).
 # The sum of the second factor is constrained to be zero. No general mean.
 # Usually this is much easier created by:
 # y <- factor(f1)
@@ -12,17 +13,32 @@
 # (phenology: observation day of phase, year, station)
 # output: dense roworder matrix, matrix.csr format (see matrix.csr in package SparseM)
 # and the sorted data frame D (data frame is being sorted first by f2 then by f1 )
-pheno.ddm <- function(D) {
+# rows with NA's are removed by default
+pheno.ddm <- function(D, na.omit=TRUE) {
 	if(!is.data.frame(D) || length(D) != 3) 
 		stop("pheno.ddm: argument must be data frame with 3 fields. Exiting ...")
 
-	# order first by factor 2 then by factor 1
-	D <-  D[order(D[[3]],D[[2]]),]
-	no <- length(D[[1]])	 	# number of observations
-	f1 <- factor(D[[2]]) 		# factor 1: year
-	n1 <- nlevels(f1) 			# number of levels factor 1 (phenology: years)
-	f2 <- factor(D[[3]])		# factor 2: station
-	n2 <- nlevels(f2)			# number of levels factor 2 (phenology: station)
+	# rows with NA's
+	rows.na <- which(is.na(D)==TRUE)%%length(D[[1]])
+	if(na.omit & length(rows.na) > 0) {
+		D <- D[-rows.na,]
+		# order first by factor 2 then by factor 1
+		D <-  D[order(D[[3]],D[[2]]),]
+		no <- length(D[[1]])	 	# number of observations
+		f1 <- factor(D[[2]]) 		# factor 1: year
+		n1 <- nlevels(f1) 		# number of levels factor 1 (phenology: years)
+		f2 <- factor(D[[3]])		# factor 2: station
+		n2 <- nlevels(f2)		# number of levels factor 2 (phenology: station)
+	}
+	else {
+		# order first by factor 2 then by factor 1
+		D <-  D[order(D[[3]],D[[2]]),]
+		no <- length(D[[1]])	 	# number of observations
+		f1 <- factor(D[[2]]) 		# factor 1: year
+		n1 <- nlevels(f1) 		# number of levels factor 1 (phenology: years)
+		f2 <- factor(D[[3]])		# factor 2: station
+		n2 <- nlevels(f2)		# number of levels factor 2 (phenology: station)
+	}
 	
 	# ra: Object of class numeric, a real array of nnz elements containing the 
 	#	non-zero elements of A, stored in row order. Thus, if i<j, all elements 
@@ -63,5 +79,5 @@ pheno.ddm <- function(D) {
 	}
 	dim <- as.integer(c(no,n1+n2-1))
 	ddm <- new("matrix.csr",ra=ra,ja=ja,ia=ia,dimension=dim)
-	return(list(ddm=ddm,D=D))
+	return(list(ddm=ddm,D=D,rows.na=rows.na))
 }

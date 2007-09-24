@@ -16,7 +16,6 @@ connectedSets <- function(M) {
 	}
 	res <- .C("connectivity",M=as.vector(t(M),"numeric"),nrows=as.integer(maxnr),ncols=as.integer(maxnc),rowclasses=vector("integer",maxnr),colclasses=vector("integer",maxnc),PACKAGE="pheno")
 	
-	attach(res)
-	return(list(rowclasses=rowclasses, colclasses=colclasses))
+	return(list(rowclasses=res$rowclasses, colclasses=res$colclasses))
 
 }

@@ -6,9 +6,10 @@
 	for usage in robust parameter estimation with rq.fit.sfn (package nprq).
 	The sum of the second factor is constrained to be zero. No general mean.
 }
-\usage{pheno.ddm(D)}
+\usage{pheno.ddm(D,na.omit=TRUE)}
 \arguments{
 	\item{D}{Data frame with three columns: (observations, factor 1, factor 2).}
+	\item{na.omit}{Determined whether missing values should be omitted or not. Default is TRUE.}
 }
 \details{
 	In phenological applications observations should be the julian day
@@ -24,7 +25,8 @@
 }
 \value{
 	\item{ddm}{Dense roworder matrix, matrix.csr format (see matrix.csr in package SparseM)}
-	\item{D}{Input data frame D sorted first by f2 then by f1.}
+	\item{D}{Data frame D sorted first by f2 then by f1 and with rows containing NA's removed.}
+	\item{na.rows}{Rows in D that were omitted due to missing values.}
 }
 \author{
 	Joerg Schaber

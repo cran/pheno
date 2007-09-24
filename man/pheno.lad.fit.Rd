@@ -30,11 +30,14 @@
 	analyses using the input data should be done using the sorted output data frame.
 }
 \value{
-	\item{p1}{Estimated parameters of factor f1, in phenology this is precisely the combined time series.}
-	\item{p2}{Estimated parameters of factor f2, in phenology these are precisely the station effects.}
+	\item{f1}{Estimated parameters of factor f1, in phenology this is precisely the combined time series.}
+	\item{f1.lev}{Levels of f1. Should be the same order as f1.}
+	\item{f2}{Estimated parameters of factor f2, in phenology these are precisely the station effects.}
+	\item{f2.lev}{Levels of f2. Should be the same order as f2.}
 	\item{resid}{Residuals}
 	\item{ierr}{For length(x) > 1000 this is the return error code of \code{rq.fit.sfn()}}
 	\item{D}{The input as ordered data frame, ordered first by f2 then by f1}
+	\item{fit}{The fitted rq.fit model object.}
 }
 \author{
 	Joerg Schaber
