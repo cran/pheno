@@ -2,14 +2,14 @@
 /**                                                                          **/
 /**                        P H E N O .  C                                    **/
 /**                                                                          **/
-/**   pheno.c: implementation file for R pheno package C functions			 **/
+/**   pheno.c: implementation file for R pheno package C functions	     **/
 /**                                                                          **/
 /**   Last changes: 2/2/2006                                                 **/
 /**                                                                          **/
 /**   written by Joerg Schaber                                               **/
-/**				Max Planck Institute for Molecular Genetics					 **/
+/**				Max Planck Institute for Molecular Genetics  **/
 /**                                                                          **/
-/**   This code is subject to the GNU PUBLIC LICENSE 2 or higher	         **/
+/**   This code is subject to the GNU PUBLIC LICENSE 2 or higher	     **/
 /******************************************************************************/
 /* ANSI C implementation of some auxiliary functions
  *
@@ -56,7 +56,7 @@
 #include "pheno.h"
 
 /* auxiliary function for integer conversion */
-void itoa(int n, char *s)
+void myitoa(int n, char *s)
 {
     int len=0,sign,i=0,j,c;
 
@@ -208,9 +208,9 @@ void jul2date1(int *doy, int *year, char *date[])
     monthc_ptr = &monthc[0];
     yearc_ptr  = &yearc[0];
 
-    itoa(*doy - month_end[month-1],day_ptr);
-    itoa(month,monthc_ptr);
-    itoa(*year,yearc_ptr);
+    myitoa(*doy - month_end[month-1],day_ptr);
+    myitoa(month,monthc_ptr);
+    myitoa(*year,yearc_ptr);
 
     if ( *doy - month_end[month-1] < 10 )
     {
