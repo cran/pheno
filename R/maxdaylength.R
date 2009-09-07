@@ -3,6 +3,5 @@ maxdaylength <- function(l) {
 
 	res <- .C("maxdaylength",l=as.double(l),maxdl=double(1),PACKAGE="pheno")
 
-	attach(res)
-	return(maxdl)
+	return(res$maxdl)
 }

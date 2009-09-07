@@ -34,8 +34,8 @@
    	set. Likewise row 3 (or columns 3 and 4) form also one connected set.	
 }
 \value{
-	\item{rowclasses}{Vector of set numbers of rows of M.}
-	\item{colclasses}{Vector of set numbers of columns of M.}
+	\item{rowclasses}{Vector of set numbers of rows of M (>=1). A value of \code{-1} indicates a row with missing data.}
+	\item{colclasses}{Vector of set numbers of columns of M(>=1).  A value of \code{-1} indicates a column with missing data.}
 }
 \references{
 	Searle (1997) 'Linear Models'. Wiley. page 318.
@@ -45,6 +45,7 @@
 }
 \seealso{
 	\code{\link{maxConnectedSet}}
+	\code{\link{getConnectedSets}}
 }
 \examples{
 	data(Simple)

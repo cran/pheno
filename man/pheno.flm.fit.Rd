@@ -7,18 +7,25 @@
 	Errors are assumed to be i.i.d. No general mean and sum of 
 	f2 is constrained to be zero.
 }
-\usage{pheno.flm.fit(D)}
+\usage{pheno.flm.fit(D,limit=1000)}
 \arguments{
 	\item{D}{Data frame with three columns (x, f1, f2) or a matrix
 	where rows are ranks of factor f1 levels and columns are ranks 
 	of factor f2 levels and missing values are assumed to be NA or 0.}	
+	\item{limit}{Integer that determines which algorithm to use (see Details).}
 }
 \details{
-	This function is basically a wrapper for the \code{lm()} function, 
-	adapted for the estimation of combined phenological time series.
+	This function is basically a wrapper for the \code{slm.fit()} function
+	form the \code{SparseM} package, adapted for the estimation of combined phenological time series.
 	In phenological application, x should be the julian day
 	of observation of a certain phase, factor f1 should be the observation year
-	and factor f2 should be a station-id. 
+	and factor f2 should be a station-id.
+	For large problems \code{length(x)>limit}, the linear model is calculated
+	for treatment contrasts for efficiency reasons, and the constraint that the sum of f2 is zero,
+	is adjusted afterwards. This results in a slight over-estimation of
+	standard errors.
+	Note that the input data is sorted before fitting, such that subsequent
+	analyses using the input data should be done using the sorted output data frame.
 }
 \value{
 	\item{f1}{Estimated fixed effects f1, in phenology this is precisely the combined time series.}
@@ -32,6 +39,7 @@
 	\item{uclf1}{Upper 95 percent confidence limit of factor f1.}
 	\item{lclf2}{Lower 95 percent confidence limit of factor f2.}
 	\item{uclf2}{Upper 95 percent confidence limit of factor f2.}
+	\item{D}{The input as ordered data frame, ordered first by f2 then by f1}
 	\item{fit}{The fitted lm model object.}
 }
 \references{
@@ -42,7 +50,7 @@
 	Joerg Schaber
 }
 \seealso{
-	\code{\link[lm]{lm}}
+	\code{\link[stats]{lm}}
 }
 \examples{
 	data(DWD)

@@ -64,6 +64,7 @@
 }
 \seealso{
 	\code{\link{connectedSets}}
+	\code{\link{maxConnectedSet}}
 }
 \examples{
 	data(Searle)

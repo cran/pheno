@@ -2,8 +2,7 @@
 \alias{pheno.ddm}
 \title{Dense design matrix for phenological data}
 \description{
-	Creation of dense two-way classification design matrix
-	for usage in robust parameter estimation with rq.fit.sfn (package nprq).
+	Creation of dense two-way classification design matrix.
 	The sum of the second factor is constrained to be zero. No general mean.
 }
 \usage{pheno.ddm(D,na.omit=TRUE)}
@@ -16,12 +15,15 @@
 	of observation of a certain phase, factor 1 should be the observation year
 	and factor 2 should be a station-id.
 	Usually this is much easier created by:
-	\code{y <- factor(f1)
-	s <- factor(f2)
+	\code{y <- factor(f1),
+	s <- factor(f2),
 	ddm <- as.matrix.csr(model.matrix(~ y + s -1, contrasts=list(s=("contr.sum"))))}.
 	However, this procedure can be quite memory demanding and might exceed storage
 	capacity for large problems. 
 	This procedure here is much less memory comsuming.
+	Moreover, in order to get direct estimates for all coefficients, 
+	an additional row is appended to the matrix, where the columns for the second factor are set to 1.
+	Therefore, dimensions of \code{ddm} are (nlevels(factor1)+1)x(nlevels(factor2)).
 }
 \value{
 	\item{ddm}{Dense roworder matrix, matrix.csr format (see matrix.csr in package SparseM)}

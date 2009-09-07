@@ -7,27 +7,31 @@
 	Errors are assumed to be i.i.d. No general mean and sum of
 	f2 is constrained to be zero.
 }
-\usage{pheno.lad.fit(D)}
+\usage{pheno.lad.fit(D,limit=1000)}
 \arguments{
 	\item{D}{Data frame with three columns (x, f1, f2) or a matrix 
 	where rows are ranks of factor f1 levels and columns are ranks 
 	of factor f2 levels and missing values are assumed to be NA or 0.}	
+	\item{limit}{Integer that determines which algorithm to use (see Details).}
 }
 \details{
 	The function minimizes the least absolute deviations (LAD or L1 norm)
 	of the residuals of a two-way linear model.
 	This function is basically a wrapper for the \code{rq.fit()} or \code{rq.fit.sfn()}
-	functions of the \code{quantreg} and \code{nprq} package, respectively,
+	functions of the \code{quantreg} package, respectively,
 	adapted for the estimation of combined phenological time series. 
-	Depending on the size of the problem (length(x)<=1000) 
+	Depending on the size of the problem \code{length(x)<=limit} 
 	either the \code{rq.fit()} function using the Barrodale-Roberts algorithm is used or 
 	(length(x)>1000) the corresponding dense matrix implementation with 
 	\code{rq.fit.sfn()} using the Interior-Point method.
 	In phenological applications, x should be the julian day
 	of observation of a certain phase, factor f1 should be the observation year
 	and factor f2 should be a station-id. 
-	Note that the input data frame is sorted before fitting, such that subsequent
+	For efficiency reasons, the linear model is calcualted for treatment contrasts 
+	and the constraint that the sum of f2 is zero, is adjusted afterwards.
+	Note that the input data is sorted before fitting, such that subsequent
 	analyses using the input data should be done using the sorted output data frame.
+	
 }
 \value{
 	\item{f1}{Estimated parameters of factor f1, in phenology this is precisely the combined time series.}
@@ -48,7 +52,7 @@
 }
 \seealso{
 	\code{\link[quantreg]{rq.fit}}
-	\code{\link[nprq]{rq.fit.sfn}}
+	\code{\link[quantreg]{rq.fit.sfn}}
 }
 \examples{
 	data(DWD)

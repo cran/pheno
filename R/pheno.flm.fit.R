@@ -3,7 +3,11 @@
 # and columns of M are ranks of factor 2 levels, missing values are assumed to be NA or 0.
 # The model assumes the both factors f1 and f2 to be fixed.
 # Errors are assumed to be i.i.d. No general mean and sum of f2 is constrained
-# to be zero. For large problems, the sparse matrix implementation slm.fit is used.
+# to be zero. 
+# For n > 1000, for efficiency resaons, the linear model is calcualted
+# for treatment contrasts and the constraint that the sum of f2 is zero,
+# is adjusted afterwards. This results in a slight over-estimation of
+# standard errors.
 # Output: f1 : coefficients of first factor
 #        f1.lev: levels of first factor
 #	 f2 :  coefficients of second fector
@@ -14,7 +18,7 @@
 #	 lclf2  : lower 95% confidence limits of factor f2
 #	 uclf2  : upper 95% confidence limits of factor f2
 #	 fit  : the fitted model object
-pheno.flm.fit <- function(D) {
+pheno.flm.fit <- function(D,limit=1000) {
 	if(!is.data.frame(D) && !is.matrix(D)) {
 		stop("flm.fit: argument must be data frame with 3 columns or matrix")
 	}
@@ -24,55 +28,79 @@ pheno.flm.fit <- function(D) {
 	if(is.matrix(D)) {
 		D <- matrix2raw(D)
 	}
+	
+	
+	D <-  D[order(D[[3]],D[[2]]),]
 
-	if(length(D[[1]]) > 1000) { # sparse matrix implementation
-		S <- pheno.ddm(D)
-		s <- factor(S$D[[3]])
-		y <- factor(S$D[[2]])
-		o <- as.vector(S$D[[1]],"numeric")
-		nobs <- length(o)
+	o <- as.vector(D[[1]],"numeric") # observations
+	n <- length(o)	 		# number of observations
+	f1 <- factor(D[[2]]) 		# factor 1: year
+	n1 <- nlevels(f1) 		# number of levels factor 1 (phenlogy: years)
+	f2 <- factor(D[[3]])		# factor 2: station
+	n2 <- nlevels(f2)		# number of levels factor 2 (phenlogy: station)
 
-		m <- S$ddm@dimension[2]
-		fit <- slm.fit(S$ddm,o,tmpmax=1000*m,small=1e-06)
-
-		fit$terms <- terms(o ~ y + s, contrasts=list(s=("contr.sum")),na.action=na.exclude)
-
-		ny <- nlevels(y)
-		f1 <- as.vector(summary.slm(fit)$coef[1:ny,1],"numeric")	
-		f1.se <- as.vector(summary.slm(fit)$coef[1:ny,2],"numeric")	
-		f2 <- as.vector(summary.slm(fit)$coef[-(1:ny),1],"numeric")	
-		f2.se <- as.vector(summary.slm(fit)$coef[-(1:ny),2],"numeric")	
-		resid <- as.vector(residuals(fit),"numeric")
-
-		df <- summary.slm(fit)$df[2]
-		lclf1 <- f1+qt(0.975,df)*summary.slm(fit)$coef[1:ny,2]
-		uclf1 <- f1-qt(0.975,df)*summary.slm(fit)$coef[1:ny,2]
-
-		lclf2 <- f2+qt(0.975,df)*summary.slm(fit)$coef[-(1:ny),2]
-		uclf2 <- f2-qt(0.975,df)*summary.slm(fit)$coef[-(1:ny),2]
-	}
-	else {		# normal fit
-		s <- factor(D[[3]])
-		y <- factor(D[[2]])
-		o <- as.vector(D[[1]],"numeric")
-		nobs <- length(o)
-
-		fit <- lm(o ~ y + s - 1, contrasts=list(s=("contr.sum")),na.action=na.exclude)
-
-		yind <- grep("y",names(coef(fit)))
-		sind <- grep("s",names(coef(fit)))
+	if(n > limit) { # treatment contrasts
 		
-		f1 <- as.vector(summary(fit)$coef[yind,1],"numeric")	
-		f1.se <- as.vector(summary(fit)$coef[yind,2],"numeric")	
-		f2 <- as.vector(summary(fit)$coef[sind,1],"numeric")	
-		f2.se <- as.vector(summary(fit)$coef[sind,2],"numeric")	
+		#dense design matrix with treatment contrasts
+		ddm <- as.matrix.csr(model.matrix(~ f1 + f2 - 1,na.action=na.exclude))
+
+		m <- ddm@dimension[2]
+		fit <- slm.fit(ddm,o,tmpmax=1000*m,small=1e-06)
+
+		fit$terms <- terms(o ~ f1 + f2, na.action=na.exclude)
+		fitsum <- summary.slm(fit)
+
+		# converting to sum contrasts
+		# the first station effect
+		p2 <- as.vector(fitsum$coef[-(1:n1),1],"numeric")
+		s1 <- -sum(p2)/n2
+		p2 <- append(s1,p2+s1)
+		
+		p1 <- as.vector(fitsum$coef[1:n1,1],"numeric")-s1	
+
+		# the standard error are not correctly estimated. This has to be adjusted.
+		p1.se <- as.vector(fitsum$coef[1:n1,2],"numeric")	
+
+		p2.se <- as.vector(fitsum$coef[-(1:n1),2],"numeric")	
+		p2.se <- append(mean(p2.se),p2.se)
+
 		resid <- as.vector(residuals(fit),"numeric")
 
-		lclf1 <- as.vector(confint(fit)[yind,1],"numeric")
-		uclf1 <- as.vector(confint(fit)[yind,2],"numeric")
-		lclf2 <- as.vector(confint(fit)[sind,1],"numeric")
-		uclf2 <- as.vector(confint(fit)[sind,2],"numeric")
+		df <- fitsum$df[2]
+
+		lclp1 <- p1-qt(0.975,df)*p1.se
+		uclp1 <- p1+qt(0.975,df)*p1.se
+
+		lclp2 <- p2-qt(0.975,df)*p2.se
+		uclp2 <- p2+qt(0.975,df)*p2.se
+	}
+	else {		# sum contrasts
+		
+		#dense design matrix with sum contrasts
+		ddm <- pheno.ddm(D)$ddm
+
+		m <- ddm@dimension[2]
+		fit <- slm.fit(ddm,append(o,0),tmpmax=1000*m,small=1e-06)
+
+		fit$terms <- terms(o ~ f1 + f2, na.action=na.exclude)
+		fitsum <- summary.slm(fit)
+
+		p1 <- as.vector(fitsum$coef[1:n1,1],"numeric")	
+		p1.se <- as.vector(fitsum$coef[1:n1,2],"numeric")	
+
+		p2 <- as.vector(fitsum$coef[-(1:n1),1],"numeric")	
+		p2.se <- as.vector(fitsum$coef[-(1:n1),2],"numeric")	
+
+		resid <- as.vector(residuals(fit),"numeric")
+
+		df <- fitsum$df[2]
+
+		lclp1 <- p1-qt(0.975,df)*p1.se
+		uclp1 <- p1+qt(0.975,df)*p1.se
+
+		lclp2 <- p2-qt(0.975,df)*p2.se
+		uclp2 <- p2+qt(0.975,df)*p2.se
 	}
 
-	return(list(f1=f1,f1.se=f1.se,f1.lev=levels(y),f2=f2,f2.se=f2.se,f2.lev=levels(s),resid=resid,lclf1=lclf1,uclf1=uclf1,lclf2=lclf2,uclf2=uclf2,fit=fit))
+	return(list(f1=p1,f1.se=p1.se,f1.lev=levels(f1),f2=p2,f2.se=p2.se,f2.lev=levels(f2),resid=resid,lclf1=lclp1,uclf1=uclp1,lclf2=lclp2,uclf2=uclp2,D=D,fit=fit))
 }

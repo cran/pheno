@@ -4,7 +4,5 @@ date2jul2 <- function(d,m,y) {
 
 	res <- .C("date2jul2",year=as.integer(y),month=as.integer(m),day=as.integer(d),doy=integer(1),PACKAGE="pheno")
 
-	attach(res)
-
-	return(list(doy=doy, year=year))
+	return(list(doy=res$doy, year=res$year))
 }

@@ -301,7 +301,7 @@ void maxdaylength(double *lat, double *maxdl)
  * Searches data entries in lines and colums 
  * of the data matrix tmp[0..maxnr-1][0..maxnc-1]
  */
-void con_step(double tmp[],int maxnc,int classes[],int index,int no_classes,int row_or_col_step,int check[],int *from,int *len,int class_nr) 
+void con_step(double tmp[],int maxnc,int classes[],int index,int no_classes,int row_or_col_step,int check[],int *from,int *len,int class_nr,int *found) 
 {
 	int i;
 	
@@ -316,12 +316,16 @@ void con_step(double tmp[],int maxnc,int classes[],int index,int no_classes,int 
 /*				printf("tmp[%d * %d + %d = %d] = %.1f\n",maxnc,index,i,maxnc*index+i,tmp[maxnc*index+i]);
 */
 				if(tmp[maxnc*index+i] != 0) {
-					(*len)++;					/* col_len */
+					(*len)++;			/* col_len */
 					check[(*len)-1] = i;  		/* check_col */
 					if(i == (*from)) (*from)++;
+					(*found)=1;
 				}
 			}
-			classes[index] = class_nr;			/* row_classes */
+/*			printf("col length: %d\n",*len);
+			printf("from col: %d\n",*from);
+*/
+			classes[index] = class_nr;		/* row_classes */
 		}
 		/* search over rows for entries */
 		else {
@@ -331,11 +335,14 @@ void con_step(double tmp[],int maxnc,int classes[],int index,int no_classes,int 
 /*				printf("tmp[%d * %d + %d = %d] = %.1f\n",maxnc,i,index,maxnc*i+index,tmp[maxnc*index+i]);
 */
 				if(tmp[maxnc*i+index] != 0) {
-					(*len)++;					/* row_len */
+					(*len)++;			/* row_len */
 					check[(*len)-1] = i;		/* check_row */
 					if(i == (*from)) (*from)++;
 				}
 			}
+/*			printf("row length: %d\n",*len);
+			printf("from row: %d\n",*from);
+*/
 			classes[index] = class_nr;			/* col_classes */
 		}
 	}
@@ -345,7 +352,7 @@ void con_step(double tmp[],int maxnc,int classes[],int index,int no_classes,int 
  * Investigates number of observations per class,
  * and finds all rows/columns connected to the current row
  */
-void exhaust_class(double tmp[],int row_classes[],int col_classes[],int check_row[],int check_col[],int *from_row,int *from_col,int no_rows,int no_cols,int class_nr)
+void exhaust_class(double tmp[],int row_classes[],int col_classes[],int check_row[],int check_col[],int *from_row,int *from_col,int no_rows,int no_cols,int class_nr,int *found)
 {
 	int i;
 	int row_step = 0;
@@ -369,7 +376,7 @@ void exhaust_class(double tmp[],int row_classes[],int col_classes[],int check_ro
 */
 		/* do first a row step, searching over columns */
 		if(row_len != 0) {
-			con_step(tmp,no_cols,row_classes,check_row[0],no_cols,row_step,check_col,from_col,&col_len,class_nr);
+			con_step(tmp,no_cols,row_classes,check_row[0],no_cols,row_step,check_col,from_col,&col_len,class_nr,found);
 			/* eliminate the row checked */
 			for(i=0;i<row_len;i++) check_row[i]=check_row[i+1];
 			row_len--;
@@ -377,7 +384,7 @@ void exhaust_class(double tmp[],int row_classes[],int col_classes[],int check_ro
 
 		/* then do a column step, searching over rows */
 		if(col_len != 0) {
-			con_step(tmp,no_cols,col_classes,check_col[0],no_rows,col_step,check_row,from_row,&row_len,class_nr);
+			con_step(tmp,no_cols,col_classes,check_col[0],no_rows,col_step,check_row,from_row,&row_len,class_nr,found);
 			/* eliminate the colmun checked */
 			for(i=0;i<col_len;i++) check_col[i]=check_col[i+1];
 			col_len--;
@@ -399,7 +406,7 @@ void exhaust_class(double tmp[],int row_classes[],int col_classes[],int check_ro
 int pick_row(int row_classes[], int no_rows)
 {
 	int i;
-	int picked = -1; /* not yes classified */
+	int picked = -1; /* not yet classified */
 	
 	for(i=0;i<no_rows;i++) {
 		if(row_classes[i] == -1) {
@@ -411,20 +418,22 @@ int pick_row(int row_classes[], int no_rows)
 }
 	
 /* Finds connected data sets of a matrix tmp[0..maxnr-1][0..maxnc-1].
- * tmp is saved rowwise.
+ * tmp is saved row-wise.
  * Non-entries in the matrix are considered 0
  * Returns two vectors: 
  * row_classes[0..maxnr-1] : Class number of the respective rows
  * col_classes[0..maxnc-1] : Class number of the respective cols
+ * class number of -1 means that there is not data in the rewspective row or column
  */
 void connectivity(double tmp[],int *maxnr,int *maxnc,int rowclasses[],int colclasses[])
 {
 	int *check_row;
 	int *check_col;
 
-	int class_nr = 0;			/* number of connected sets */
-	int from_row = 1;			/* starting row to search, first row is already picked */
-	int from_col = 0;			/* starting column to search */
+	int class_nr = 0;		/* number of connected sets */
+	int from_row = 1;		/* starting row to search, first row is already picked */
+	int from_col = 0;		/* starting column to search */
+	int found;			/* check whether data is found */ 
 	int picked,i;
 
 	check_row=(int *) calloc((*maxnr)*(*maxnc),sizeof(int)); /* checked rows for each set */
@@ -442,12 +451,27 @@ void connectivity(double tmp[],int *maxnr,int *maxnc,int rowclasses[],int colcla
 
 	/* as long as there are rows not yet classified */
 	while(picked != -1) {
+/*		printf("from row: %d\n",from_row);
+		printf("from col: %d\n",from_col);
+*/
+		found=0;
 		class_nr++;
 		check_row[0] = picked;
 		/* find all rows/column connected to the current row */
-		exhaust_class(tmp,rowclasses,colclasses,check_row,check_col,&from_row,&from_col,*maxnr,*maxnc,class_nr);
+		exhaust_class(tmp,rowclasses,colclasses,check_row,check_col,&from_row,&from_col,*maxnr,*maxnc,class_nr,&found);
+		/* check whether data was found in that class, i.e. row,
+		 * if not, set back class number and set respective row class to -1.
+		 * colums without data are not assigned a class number and stay -1 */
+/*		printf("found =%d\n",found);
+*/
+		if(found==0) {
+			for(i=0;i<*maxnr;i++) if(rowclasses[i]==class_nr) rowclasses[i]=-2;
+			class_nr--;
+		}
 		picked = pick_row(rowclasses,*maxnr);
 	}
+	/* check for not classified rows */
+	for(i=0;i<*maxnr;i++) if(rowclasses[i]==-2) rowclasses[i]=-1;
 
 /*	printf("connectedSets found %d connected sets\n",class_nr);
 */

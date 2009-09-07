@@ -20,6 +20,8 @@
 	In phenological application, x should be the julian day
 	of observation of a certain phase, factor f1 should be the observation year
 	and factor f2 should be a station-id. 
+	Note that the input data is sorted before fitting, such that subsequent
+	analyses using the input data should be done using the sorted output data frame.
 }
 \value{
 	\item{fixed}{Estimated fixed effects, in phenology this is precisely the combined time series.}
@@ -30,6 +32,7 @@
 	\item{SEf2}{Standard error group f2, i.e. square root of variance component random effect.}
 	\item{lclf}{Lower 95 percent confidence limit of fixed effects.}
 	\item{uclf}{Upper 95 percent confidence limit of fixed effects.}
+	\item{D}{The input as ordered data frame, ordered first by f2 then by f1}
 	\item{fit}{The fitted lme model object.}
 }
 \references{

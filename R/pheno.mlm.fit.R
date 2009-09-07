@@ -26,7 +26,7 @@ pheno.mlm.fit <- function(D) {
 		D <- matrix2raw(D)
 	}
 
-	require(nlme)
+	D <-  D[order(D[[3]],D[[2]]),]
 
 	s <- factor(D[[3]])
 	y <- factor(D[[2]])
@@ -40,5 +40,5 @@ pheno.mlm.fit <- function(D) {
 	SEf2 <-   attr(remlfit$apVar,"Pars")[[2]]
 	lclf <- as.vector(intervals(remlfit,which="fixed")$fixed[,1],"numeric")
 	uclf <- as.vector(intervals(remlfit,which="fixed")$fixed[,3],"numeric")
-	return(list(fixed=fixed,fixed.lev=levels(y),random=random,random.lev=levels(s),resid=resid,SEf1=SEf1,lclf=lclf,uclf=uclf,fit=remlfit))
+	return(list(fixed=fixed,fixed.lev=levels(y),random=random,random.lev=levels(s),resid=resid,SEf1=SEf1,lclf=lclf,uclf=uclf,D=D,fit=remlfit))
 }
