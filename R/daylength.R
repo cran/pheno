@@ -4,7 +4,7 @@
 # the whole earth (-23 degrees - + 23 degrees)
 daylength <- function(i,l) {
 	if(!is.integer(i)) stop("daylength: first argument must be an integer. Exiting ...")	
-	res <- .C("daylength",l=as.double(l),i=as.integer(i),dl=double(1),delta=double(1),PACKAGE="pheno")
+	res <- .C("Cdaylength",l=as.double(l),i=as.integer(i),dl=double(1),delta=double(1),PACKAGE="pheno")
 	
 	return(list(dl=res$dl, delata=res$delta))
 

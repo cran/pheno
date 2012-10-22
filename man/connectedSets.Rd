@@ -20,7 +20,7 @@
 	always unbalanced because of missing data. Thus, when combined time
 	series are to be estimated, it is worth checking for and finding
 	connected data sets for which combined time series can then be estimated.
-	Example (also see example data(Simple) and example in 'maxConnectedSets'):
+	Example (also see example data(Simple) and example in 'maxConnectedSet'):
 	In the following matrix dots represent missing values, X represent observations
 	and the lines join the connected sets:
 	   

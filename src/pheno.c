@@ -48,6 +48,7 @@
  * 
  * 9. connectivity: finds connected data sets of a matrix
 
+ * Function with the same R-name are named with a 'C' at the beginning.
  */
 
 #include <stdio.h>
@@ -89,7 +90,7 @@ void myitoa(int n, char *s)
     *(s+len) = '\0';
 }
 
-void date2jul1(char *date[], int *doy, int *year)
+void Cdate2jul1(char *date[], int *doy, int *year)
 {
     int day, month, ly;
     int month_end[13]={0,31,59,90,120,151,181,212,243,273,304,334,365};
@@ -98,7 +99,7 @@ void date2jul1(char *date[], int *doy, int *year)
     month = atoi((*date)+3);
     *year = atoi((*date)+6);
 
-	leapyear(year,&ly);
+	Cleapyear(year,&ly);
 	
     if(ly && month > 2)
     {
@@ -107,11 +108,11 @@ void date2jul1(char *date[], int *doy, int *year)
     else *doy = month_end[month-1]+day;
 }
  
-void date2jul2(int *year, int *month, int *day, int *doy)
+void Cdate2jul2(int *year, int *month, int *day, int *doy)
 {
     int ly,month_end[13]={0,31,59,90,120,151,181,212,243,273,304,334,365};
 
-	leapyear(year,&ly);
+	Cleapyear(year,&ly);
 
     if(ly && *month > 2)
     {
@@ -121,24 +122,24 @@ void date2jul2(int *year, int *month, int *day, int *doy)
 
 }
 
-void daysbetween(char *date1[], char *date2[], int *ndays)
+void Cdaysbetween(char *date1[], char *date2[], int *ndays)
 {
     int ly,doy1,doy2,year1,year2,i,tmp;
 
-    date2jul1(date1,&doy1,&year1);
-    date2jul1(date2,&doy2,&year2);
+    Cdate2jul1(date1,&doy1,&year1);
+    Cdate2jul1(date2,&doy2,&year2);
 
     if(year1==year2) *ndays = abs(doy1-doy2);
     else if( year1 > year2 )
     { 
-		leapyear(&year2,&ly);
+		Cleapyear(&year2,&ly);
 
         if(ly) tmp = 366 - doy2;
         else tmp = 365 - doy2;
 
         for(i=year2+1;i<year1;i++)
         {
-			leapyear(&i,&ly);
+			Cleapyear(&i,&ly);
 
             if(ly) tmp = tmp + 366;
             else tmp = tmp + 365;
@@ -148,14 +149,14 @@ void daysbetween(char *date1[], char *date2[], int *ndays)
     }
     else
     {
-		leapyear(&year1,&ly);
+		Cleapyear(&year1,&ly);
 
         if(ly) tmp = 366 - doy1;
         else tmp = 365 - doy1;
 
         for(i=year1+1;i<year2;i++)
         {
-			leapyear(&i,&ly);
+			Cleapyear(&i,&ly);
 
             if(ly) tmp = tmp + 366;
             else tmp = tmp + 365;
@@ -165,7 +166,7 @@ void daysbetween(char *date1[], char *date2[], int *ndays)
     }
 }
 
-void daylength(double *lat, int *iday, double *dl, double *delta)
+void Cdaylength(double *lat, int *iday, double *dl, double *delta)
 {
     double arg;
 
@@ -179,14 +180,14 @@ void daylength(double *lat, int *iday, double *dl, double *delta)
     else *dl = (24./M_PI)*acos(arg);
 }
 
-void jul2date1(int *doy, int *year, char *date[])
+void Cjul2date1(int *doy, int *year, char *date[])
 {
     char day[3],monthc[3],yearc[5];
     char *day_ptr, *monthc_ptr, *yearc_ptr;
     int ly,month = 1;
     int month_end[13]={0,31,59,90,120,151,181,212,243,273,304,334,365};
 
-	leapyear(year,&ly);
+	Cleapyear(year,&ly);
 
     if( ly )
     {
@@ -244,12 +245,12 @@ void jul2date1(int *doy, int *year, char *date[])
     date[0][10] = '\0';
 }
 
-void jul2date2(int *doy, int *year, int *day, int *month)
+void Cjul2date2(int *doy, int *year, int *day, int *month)
 {
     int ly, monthc = 1;
     int month_end[13]={0,31,59,90,120,151,181,212,243,273,304,334,365};
 
-	leapyear(year,&ly);
+	Cleapyear(year,&ly);
 	
     if( ly )
     {
@@ -271,7 +272,7 @@ void jul2date2(int *doy, int *year, int *day, int *month)
     *month = monthc;
 }
 
-void leapyear(int *year, int *ly)
+void Cleapyear(int *year, int *ly)
 {
     if( (*year)%400==0 || ( (*year)%100!=0 && (*year)%4==0 ))
     {
@@ -283,7 +284,7 @@ void leapyear(int *year, int *ly)
     }
 }
 
-void maxdaylength(double *lat, double *maxdl)
+void Cmaxdaylength(double *lat, double *maxdl)
 {
     double arg,delta;
 
@@ -408,12 +409,18 @@ int pick_row(int row_classes[], int no_rows)
 	int i;
 	int picked = -1; /* not yet classified */
 	
-	for(i=0;i<no_rows;i++) {
+	for(i=no_rows-1;i>=0;i--) {
+		if(row_classes[i] == -1) {
+			picked = i;
+		}
+	}
+/*	for(i=0;i<no_rows;i++) {
 		if(row_classes[i] == -1) {
 			picked = i;
 			break;
 		}
 	}
+*/
 	return picked;
 }
 	
@@ -425,7 +432,7 @@ int pick_row(int row_classes[], int no_rows)
  * col_classes[0..maxnc-1] : Class number of the respective cols
  * class number of -1 means that there is not data in the rewspective row or column
  */
-void connectivity(double tmp[],int *maxnr,int *maxnc,int rowclasses[],int colclasses[])
+void Cconnectivity(double tmp[],int *maxnr,int *maxnc,int rowclasses[],int colclasses[])
 {
 	int *check_row;
 	int *check_col;

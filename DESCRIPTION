@@ -1,7 +1,7 @@
 Package: pheno
 Title: Auxiliary functions for phenological data analysis
-Version: 1.5
-Date: 7.9.2009
+Version: 1.6
+Date: 22.10.2012
 Author: Joerg Schaber
 Description: Provides some easy-to-use functions for time series
         analyses of (plant-) phenological data sets. These functions
@@ -12,8 +12,8 @@ Description: Provides some easy-to-use functions for time series
         Some date conversion functions to handle Julian dates are also
         provided.
 Maintainer: Joerg Schaber <j.schaber@web.de>
-Depends: R (>= 2.1), nlme, SparseM, quantreg
+Depends: R (>= 2.14), nlme, SparseM, quantreg
 License: GPL (>= 2)
-Packaged: 2009-10-16 11:16:16 UTC; schaber
+Packaged: 2012-10-23 07:24:30 UTC; schaber
 Repository: CRAN
-Date/Publication: 2009-10-16 14:05:29
+Date/Publication: 2012-10-23 09:37:11

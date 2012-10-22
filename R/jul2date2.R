@@ -4,7 +4,7 @@
 jul2date2 <- function(d,y) {
 	if(missing(y)) y <- 2001
 	
-	res <- .C("jul2date2",doy=as.integer(d),year=as.integer(y),day=integer(1),month=integer(1),PACKAGE="pheno")
+	res <- .C("Cjul2date2",doy=as.integer(d),year=as.integer(y),day=integer(1),month=integer(1),PACKAGE="pheno")
 
 	return(list(day=res$day,month=res$month,year=res$year))
 }

@@ -47,7 +47,7 @@ pheno.lad.fit <- function(D,limit=1000) {
 		ddm <- as.matrix.csr(mm)
 		m <- ddm@dimension[2]
 		nnzdmax <- ddm@ia[n + 1] - 1
-		l1fit <- rq.fit.sfn(ddm,o,tau=0.5,tmpmax=1000*m,nnzlmax=100*nnzdmax,small=1e-06)
+		l1fit <- rq.fit.sfn(ddm,o,tau=0.5,control=list(tmpmax=1000*m,nnzlmax=100*nnzdmax,small=1e-06))
 	}
 	else {
 		l1fit <- rq.fit(mm,o,tau=0.5,method="br")
