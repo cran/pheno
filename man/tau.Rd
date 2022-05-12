@@ -23,7 +23,7 @@
 		No 143. Geneva. Switzerland. World Meteorological Society.
 	Schaber J (2003) 'Phenology in German in the 20th Century: Methods, analyses and models.
 		Ph.D. Thesis. University of Potsdam. Germany.
-		\url{http://pub.ub.uni-potsdam.de/2002meta/0022/door.htm}
+		\url{https://nbn-resolving.org/urn:nbn:de:kobv:517-0000532}
 }
 \keyword{ts}
 \keyword{utilities}

@@ -14,7 +14,7 @@ connectedSets <- function(M) {
 			if(is.na(M[i,j])) { M[i,j] <- 0 }
 		}
 	}
-	res <- .C("Cconnectivity",M=as.vector(t(M),"numeric"),nrows=as.integer(maxnr),ncols=as.integer(maxnc),rowclasses=vector("integer",maxnr),colclasses=vector("integer",maxnc),PACKAGE="pheno")
+	res <- .C("Cconnectivity",M=as.vector(t(M),"numeric"),nrows=as.integer(maxnr),ncols=as.integer(maxnc),rowclasses=vector("integer",maxnr),colclasses=vector("integer",maxnc))
 	
 	return(list(rowclasses=res$rowclasses, colclasses=res$colclasses))
 
